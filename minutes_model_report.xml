@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+<report id="report_minutes_model_action" string = "Meeting Invitation with Agenda" model="meeting.information" report_type="qweb-pdf" name="minutes_model.report_minutes_model_template"/>
+<template id="report_minutes_model_template">
+<t t-call="report.html_container">
+<t t-call="report.external_layout">
+<div class="page">
+<!-- Report page content -->
+<div> 	
+</div>
+<div align = "center"><u><b>Regarding Invitation For 
+<t t-foreach="docs" t-as="p">  <span t-field="p.meeting_type.meeting_type"/> </t>  </b></u></div>
+<div>
+Dear Sir/Madam
+</div>
+<div>
+<p style= " text-align: justify;">
+
+<t t-foreach="docs" t-as="p"> 
+
+I would like to take this oppurtunity to invite you to <span t-field="p.meeting_type.meeting_type"/> for the purpose of <span t-field="p.meeting_purpose"/>. It will be held on the date of <span t-field="p.meeting_date"/>  at <span t-field="p.venue_fk.venue_name"/>, <span t-field="p.venue_fk.venue_address"/>. The meeting will be moderated by  <span t-field="p.meeting_moderator1.participant_name"/>.
+Stated below are the agendas for the meeting, so far. Please feel free to suggest if there are any other additions.
+</t>
+</p>
+
+</div>
+<br/>
+<u><b>Agendas to be discussed:</b></u>
+<table width="100%" border="2" cellspacing="0" cellpadding="0">
+
+<t t-set="i" t-value="1"/>
+<tr><th>Sno</th><th>Agenda</th><th>Owner</th><th>Remarks</th></tr>
+<t t-foreach="docs.agenda_ids" t-as="o">
+<tr>
+<td>
+<span t-esc="i"/>
+</td>
+<td>
+<span t-field="o.agenda_name"/>
+</td>
+
+<td>
+<span t-field="o.agenda_owner"/>
+</td>
+
+<td>
+<span t-field="o.remarks"/>
+</td>
+</tr>
+
+    <t t-set="i" t-value="i+1"/>
+</t>
+</table>
+
+<br/><br/>
+
+<u><b>Invitees:</b></u>
+
+<table width="100%" border="2" cellspacing="0" cellpadding="0">
+
+<t t-set="i" t-value="1"/>
+
+<tr><th style="margin-left:30px;">Sno</th><th style="margin-left:30px;">Participant</th><th style="margin-left:30px;">Email</th><th style="margin-left:30px;">Department/Company</th>
+<th style="margin-left:30px;">Phone</th>
+</tr>
+<t t-foreach="docs.participant_ids" t-as="o">
+<tr>
+<td>
+
+<span t-esc="i"/>
+</td> 
+<td>
+<span t-field="o.participant_name"/>
+</td>
+
+<td>
+<span t-field="o.email_id"/>
+</td>
+
+<td>
+<span t-field="o.department"/>
+</td>
+
+<td>
+<span t-field="o.phone_number"/>
+</td>
+
+    <t t-set="i" t-value="i+1"/>
+</tr>
+</t>
+<t t-foreach="docs.contact_ids" t-as="z">
+<tr><td>
+
+<span t-esc="i"/>
+</td>  
+<td>
+<span t-field="z.participant_name"/>
+</td>
+
+<td>
+<span t-field="z.email_id"/>
+</td>
+
+<td>
+<span t-field="z.company_name"/>
+</td>
+
+<td>
+<span t-field="z.phone_number"/>
+</td>
+
+    <t t-set="i" t-value="i+1"/>
+</tr>
+</t>
+</table>
+
+<br/><br/>
+
+Looking forward to seeing you.
+
+
+<br/><br/><br/><br/><br/>
+<div>
+Thank You,<br/>
+<t t-foreach="docs" t-as="p"> <span t-field="p.meeting_moderator1.participant_name"/></t>,<br/>
+BI Solutions
+</div>
+</div>
+</t>
+</t>
+</template>
+</data>
+</openerp>

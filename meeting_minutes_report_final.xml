@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+<report id="report_minutes_report_action" string = "Meeting Minutes" model="meeting.information" report_type="qweb-pdf" name="minutes_model.report_minutes_template"/>
+<template id="report_minutes_template">
+<t t-call="report.html_container">
+<t t-call="report.external_layout">
+<div class="page">
+<!-- Report page content -->
+<div> 	
+</div>
+<div style="margin-left:430px;"><u><b>Meeting Minutes</b></u></div>
+<div>
+Dear Sir/Madam
+</div>
+<div>
+<p style= " text-align: justify;">
+<t t-foreach="docs" t-as="p">
+<br/>
+
+<br/>
+The meeting called for the <span t-field="p.meeting_type.meeting_type"/> in date <span t-field="p.meeting_date"/> was successfully organized in the venue   <span t-field="p.venue_fk.venue_name"/>, <span t-field="p.venue_fk.venue_address"/>. All the agendas set before was discussed and some decision were taken according to given proposal on the meeting. Decision taken during the meeting are as follows:
+</t>
+</p>
+</div>
+<table width="100%" border="2" cellspacing="0" cellpadding="0">
+
+<t t-set="i" t-value="1"/>
+
+<tr><th>Sno</th><th>Agenda</th><th>Decision</th><th>Remarks</th></tr>
+<t t-foreach="docs.decision_id" t-as="o">
+<tr>
+
+<td>
+<span t-esc="i"/>
+</td>
+
+
+<td>
+<span t-field="o.agenda_id.agenda_name"/>
+</td>
+
+<td>
+<span t-field="o.decision_name"/>
+</td>
+
+<td>
+<span t-field="o.decision_remarks"/>
+</td>
+
+    <t t-set="i" t-value="i+1"/>
+</tr>
+
+</t>
+<!--
+<t t-foreach="docs.decision_id" t-as="o">
+<t t-foreach="docs.agenda_ids" t-as="p">
+<span t-if="not o.agenda_id.agenda_name==p.agenda_name">
+<tr>
+<td>
+</td>
+<td>
+<span t-field="p.agenda_name"/>
+</td>
+<td>
+Undecided
+</td>
+<td>
+</td>
+</tr>      
+</span> -->
+</table>
+
+
+<br/><br/>
+<u><b>Attendees:</b></u>
+
+<table width="100%" border="2" cellspacing="0" cellpadding="0">
+
+<t t-set="i" t-value="1"/>
+
+<tr><th>Sno</th><th>Participant</th><th>Email</th><th>Department</th><th>Signature</th> </tr>
+<t t-foreach="docs.attendance_id" t-as="s">
+<tr>
+
+<td>
+<span t-esc="i"/>
+</td>
+
+<td>
+<span t-field="s.attendance_id.participant_name"/>
+</td>
+
+<td>
+<span t-field="s.attendance_id.email_id"/>
+</td>
+
+<td>
+<span t-field="s.attendance_id.department"/>
+</td>
+ <t t-set="i" t-value="i+1"/>
+</tr>
+
+   
+</t>
+</table>
+
+
+<br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/>
+Thank You,<br/>
+BI Solutions
+</div>
+</t>
+</t>
+</template>
+</data>
+</openerp>

@@ -1,0 +1,301 @@
+<?xml version = "1.0"?>
+<openerp>
+    <data>
+        <record id="minutes_workflow" model="workflow">
+            <field name="name">meeting.minutes.workflow</field>
+            <field name="osv">meeting.information</field>
+            <field name="on_create">True</field>
+        </record>
+
+        <record id="activity_a" model="workflow.activity">
+            <field name="wkf_id" ref="minutes_workflow"/>
+            <field name="flow_start">True</field>
+            <field name="name">create</field>
+            <field name="kind">function</field>
+            <field name="action">concept_progressbar()</field>
+        </record>
+
+        <record id="activity_b" model="workflow.activity">
+            <field name="wkf_id" ref="minutes_workflow"/>
+            <field name="name">meeting</field>
+            <field name="kind">function</field>
+            <field name="action">progress_progressbar()</field>
+        </record>
+
+        <record id="activity_c" model="workflow.activity">
+            <field name="wkf_id" ref="minutes_workflow"/>
+            <field name="flow_stop">True</field>
+            <field name="name">minutes</field>
+            <field name="kind">function</field>
+            <field name="action">done_progressbar()</field>
+        </record>
+
+        <record id="trans_a_b" model="workflow.transition">
+            <field name="act_from" ref="activity_a"/>
+            <field name="act_to" ref="activity_b"/>
+            <field name="signal">created</field>
+        </record>
+
+        <record id="trans_b_c" model="workflow.transition">
+            <field name="act_from" ref="activity_b"/>
+            <field name="act_to" ref="activity_c"/>
+            <field name="signal">done</field>
+        </record>
+
+        <record id="view_filter_meeting_minutes" model="ir.ui.view">
+            <field name="name">Meeting Minutes Filter</field>
+            <field name="model">meeting.information</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="meeting_type"/>
+                    <field name="meeting_date"/>
+
+                </search>
+            </field>
+        </record>
+        <act_window id = "action_minutes_task" name ="Minutes Task" res_model= "meeting.information" view_mode ="tree,form,kanban"/>
+        <menuitem id= "menu_minutes_task" name = "Meeting Minutes" sequence = "20" action = "action_minutes_task"/>
+
+        <record id="view_form_meeting_minutes" model="ir.ui.view">
+            <field	name="name">Meeting Minutes Form</field>
+            <field	name="model">meeting.information</field>
+            <field	name="arch" type="xml">
+                <form string="Meeting Minutes">
+                    <header>
+                        <button string="Meeting" type="object" name="progress_progressbar" attrs="{'invisible': [('state','!=','create')]}"/>
+                                                <button string="Minutes" type="object" name="done_progressbar" attrs="{'invisible': [('state','!=','meeting',)]}"/>
+
+
+                        <field name="state" widget="statusbar" clickable="True"/>
+                    </header>
+                    <sheet attrs="{'invisible':[('state', '=', 'meeting')]}">
+                        <h2 color= "Blue"> Meeting Information</h2>
+                        <group name="group_top">
+                            <group name="group_left" attrs="{'readonly':[('state','=', 'minutes')]}">
+                                <field name="meeting_type" attrs="{'readonly':[('state','=', 'minutes')]}"/>
+                                <field name="meeting_purpose" attrs="{'readonly':[('state','=', 'minutes')]}"/>
+                                <field name="meeting_date" attrs="{'readonly':[('state','=', 'minutes')]}"/>
+                                <br/><br/>
+                            </group>
+                            <group name="group_right" >
+                                <field name= "venue_fk" attrs="{'readonly':[('state','=', 'minutes')]}"/>
+                                <field name= "meeting_moderator1" attrs="{'readonly':[('state','=', 'minutes')]}"/>
+                            </group>
+                        </group>
+                        <h2>Agendas</h2>
+                        <field name= "agenda_ids" nolabel = "1" colspan = "4" mode= "tree" attrs="{'readonly':[('state','=', 'minutes')]}">
+                            <tree string="agenda tree">
+                                <field name='agenda_name'/>
+                                <field name='remarks'/>
+                                <field name='agenda_owner'/>
+                            </tree>
+                        </field>
+                    </sheet>
+
+
+
+                    <notebook position="inside">
+
+                        <page string="Participant" attrs="{'invisible':[('state', '=', 'meeting')]}">
+                            <group name="group_down">
+                                <group name="group_left1">
+                                    <h4>Internal</h4>
+                                    <field name= "participant_ids" nolabel = "1" colspan = "4" mode= "tree" attrs="{'readonly':[('state','=', 'minutes')]}">
+                                        <tree string="participant tree">
+                                            <field name='contact_id'/>
+                                            <field name='email_id'/>
+                                            <field name='department'/>
+                                        </tree>
+                                    </field>
+
+                                </group>
+                                <group name="group_right1">
+                                    <h4>External</h4>
+                                    <field name= "contact_ids" nolabel = "1" colspan = "4" mode= "tree" attrs="{'readonly':[('state','=', 'minutes')]}">
+
+                                        <tree string="Contact tree">
+                                            <field name='participant_name'/>
+                                            <field name='email_id'/>
+                                            <field name='company_name'/>
+
+                                        </tree>
+                                    </field>
+
+                                </group>
+                            </group>
+
+                        </page>
+                        <page string="Attendance"  attrs="{'invisible':[('state', '=', 'create')]}">
+                            <field name= "attendance_id" nolabel = "1" colspan = "4" mode= "tree" attrs="{'readonly':[('state','=', 'minutes')]}">
+                                <tree string="attendance tree" editable="True">
+                                    <field name='part'  />
+                                    <!--<field name='attendance_id'> <field name='participant_name'/></field>-->
+                                    <field name='attendance'  />
+
+                                </tree>
+                            </field>
+
+
+                        </page>
+                        <page string="Discussion"  attrs="{'invisible':[('state', '=', 'create')]}">
+                            <field name="message_follower_ids" widget="mail_followers" groups="base.group_user" attrs="{'readonly':[('state','=', 'minutes')]}"/>
+                            <field name="message_ids" widget="mail_thread" attrs="{'readonly':[('state','=', 'minutes')]}"/>
+
+
+
+                        </page>
+                        <page string="Decision"  attrs="{'invisible':[('state', '=', 'create')]}">
+                            <field name= "decision_id" nolabel = "1" colspan = "4" mode= "tree" attrs="{'readonly':[('state','=', 'minutes')]}">
+                                <tree string="decision tree" editable="True">
+                                    <field name='agenda_id'/>
+                                    <field name='decision_name'/>
+                                    <field name='decision_remarks'/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Assign Task"  attrs="{'invisible':[('state', '=', 'create')]}" editable="True">
+                            <field name= "assign_id" nolabel = "1" colspan = "4" mode= "tree" attrs="{'readonly':[('state','=', 'minutes')]}">
+                                <tree string="Asignee tree" editable="True">
+                                    <field name='asigned_id'/>
+                                    <field name='email_id'/>
+                                    <field name='department'/>
+                                    <field name='decision_id'/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </form>
+
+            </field>
+
+        </record>
+
+        <record id="view_tree_todo_task" model="ir.ui.view">
+            <field name="name">Meeting Minutes Tree</field>
+            <field name="model">meeting.information</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="meeting_purpose"/>
+                    <field name="meeting_type"/>
+                    <field name="meeting_date"/>
+                    <field name="meeting_moderator"/>
+                    <field name="venue_fk"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="resource_kanban_view">
+            <field name="name">Meeting Minutes Kanban View</field>
+            <field name="model">meeting.information</field>
+            <field name="type">kanban</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <templates color="green">
+                        <t t-name="kanban-box">
+                            <div color="green">
+                                <div class="oe_resource_image">
+                                    <a type="edit"><img src ="photo/Solid_green.png"/></a>
+
+                                    <div class="oe_resource_details">
+                                        <ul>
+                                            <!--Here you have to write the object's field name which you want to display in kanban view -->
+                                            <li><field name="meeting_purpose"/></li>
+                                            <li><field name="meeting_type"/></li>
+                                            <li><field name="meeting_date"/></li>
+                                            <li><field name="meeting_moderator"/> </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+
+        <!--AGENDA -->
+
+        <record id="view_form_agenda_form" model="ir.ui.view">
+            <field name="name">Agenda Form</field>
+            <field name="model">meeting.agenda</field>
+            <field name="arch" type="xml">
+                <form string="To-do Task">
+
+                    <group name="group_top">
+                        <group name="group_left">
+                            <field name="agenda_name"/>
+                            <field name="remarks"/>
+                        </group>
+                        <group name="group_right">
+                            <field name="agenda_owner"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="venue_form" model="ir.ui.view">
+            <field name="name">Venue Form</field>
+            <field name="model">meeting.venue</field>
+            <field name="arch" type="xml">
+                <form string="Venue Form">
+                    <group name="group_top">
+                        <group name="group_left">
+                        <field name="venue_name"/>
+                        <field name="venue_address"/>
+                            </group>
+                        <group name="group_right">
+                        <field name="venue_remarks"/>
+                    </group>
+                     </group>
+                </form>
+            </field>
+        </record>
+
+        <!--PARTICIPANT -->
+
+        <record id="view_form_participant_form" model="ir.ui.view">
+            <field name="name">Participant Form</field>
+            <field name="model">meeting.participant</field>
+            <field name="arch" type="xml">
+                <form string="To-do Task">
+
+                    <group name="group_top">
+                        <group name="group_left">
+                            <field name="contact_id"/>
+                            <field name="email_id"/>
+
+                        </group>
+                        <group name="group_right">
+                            <field name = "department"/>
+                            <field name="phone_number"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+<record id="external_form" model="ir.ui.view">
+    <field name="name">External Form</field>
+    <field name="model">meeting.external</field>
+    <field name="arch" type="xml">
+        <form string="External Form">
+            <group name="top">
+                <group name="left">
+                    <field name="participant_name"/>
+                    <!--<field name="designation"/>-->
+                    <field name="company_name"/>
+                </group>
+                <group name="right">
+                    <field name="email_id"/>
+                    <field name="phone_number"/>
+                </group>
+            </group>
+        </form>
+    </field>
+</record>
+
+
+    </data>
+</openerp>
